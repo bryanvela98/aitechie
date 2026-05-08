@@ -31,11 +31,7 @@ def _load_parts_index(slug: str) -> PartsIndex | None:
 
 
 def _strict_match(entry: PartsIndexEntry, q: StockSearchQuery) -> bool:
-    """Type, package, value_canonical, MPN must match. voltage_rating ≥ requested.
-
-    Safety margin: exact_only parts require voltage_rating > voltage_min (strict);
-    tolerant parts accept voltage_rating >= voltage_min.
-    """
+    """Type, package, value_canonical, MPN must match. voltage_rating ≥ requested."""
     if q.type and entry.type != q.type:
         return False
     if q.package and entry.package != q.package:
@@ -45,15 +41,8 @@ def _strict_match(entry: PartsIndexEntry, q: StockSearchQuery) -> bool:
     if q.mpn and entry.mpn != q.mpn:
         return False
     if q.voltage_min is not None:
-        if entry.voltage_rating is None:
+        if entry.voltage_rating is None or entry.voltage_rating < q.voltage_min:
             return False
-        if entry.safety_class == "exact_only":
-            # Safety-critical parts must exceed the requested minimum — no riding the edge.
-            if entry.voltage_rating <= q.voltage_min:
-                return False
-        else:
-            if entry.voltage_rating < q.voltage_min:
-                return False
     return True
 
 

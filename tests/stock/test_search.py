@@ -93,9 +93,10 @@ def test_exact_match_decoupling(two_donors):
         type="capacitor", value_canonical="0.1uF", package="0402",
         voltage_min=25.0, requested_role="decoupling",
     ))
-    # 3 exact matches: C1 (x), C2 (x, voltage_rating ≥ 25), C10 (13)
+    # All 4 caps match strictly: C1 (x, 25V), C2 (x, 50V), C3 (x, 25V — exact_only
+    # role on donor but exact value match wins per spec §6), C10 (13, 25V).
     refdes_set = {m.refdes for m in res.exact_matches}
-    assert refdes_set == {"C1", "C2", "C10"}
+    assert refdes_set == {"C1", "C2", "C3", "C10"}
     assert all(m.match_kind == "exact" for m in res.exact_matches)
 
 
