@@ -128,11 +128,15 @@ def list_donor_parts(donor_id: str):
         parts.append({
             "refdes": refdes,
             "type": entry.type,
+            "kind": entry.kind,
             "value_canonical": entry.value_canonical,
             "package": entry.package,
+            "mpn": entry.mpn,
+            "voltage_rating": entry.voltage_rating,
             "role_in_design": entry.role_in_design,
             "safety_class": entry.safety_class,
             "criticality_in_design": entry.criticality_in_design,
+            "pages": entry.pages,
             "available": refdes not in donor.consumed,
         })
     return {"donor_id": donor_id, "has_parts_index": True, "parts": parts}

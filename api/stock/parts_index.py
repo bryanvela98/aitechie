@@ -116,10 +116,18 @@ def _criticality_from_boot_sequence(
 
 
 def _classifications_index(passive_classification: dict | None) -> dict[str, str | None]:
-    """Build {refdes: role} from passive_classification_llm.json shape."""
+    """Build {refdes: role} from passive_classification_llm.json.
+
+    The LLM artefact uses the `assignments` key (post-Phase-4 schema). Older
+    fixtures and the synthetic test data use `classifications`. Tolerate both.
+    """
     if not passive_classification:
         return {}
-    items = passive_classification.get("classifications", [])
+    items = (
+        passive_classification.get("assignments")
+        or passive_classification.get("classifications")
+        or []
+    )
     return {item["refdes"]: item.get("role") for item in items if "refdes" in item}
 
 
@@ -148,15 +156,18 @@ def build_parts_index(
         comp_kind = comp.get("kind", "ic")
         value = comp.get("value")
 
-        # Role derivation
+        # Role derivation. Two sources, in order:
+        # 1. Heuristic role written by compile_electrical_graph into the
+        #    component itself (covers ~85-90% of passives directly).
+        # 2. LLM-filled role for the residual ambiguous cases — kept in
+        #    passive_classification_llm.json:assignments.
+        # ICs and connectors short-circuit to a fixed role.
         if comp_type == "ic":
             role = "ic"
         elif comp_type == "connector":
             role = "connector"
         else:
-            role = classifications.get(refdes)
-            # fallback: if none, leave None (no fancy heuristic on net classification
-            # in v1 — passive_classifier covers ~95% of passives)
+            role = comp.get("role") or classifications.get(refdes)
 
         safety = classify_safety(role=role, type=comp_type)
 
