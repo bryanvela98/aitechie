@@ -47,6 +47,7 @@ from api.pipeline.schematic.schemas import (
     NetClassification,
     SchematicPageGraph,
 )
+from api.stock.parts_index import build_parts_index
 
 logger = logging.getLogger("wrench_board.pipeline.schematic.orchestrator")
 
@@ -236,7 +237,46 @@ async def ingest_schematic(
             output_dir=output_dir,
         )
 
+    _write_parts_index(
+        device_slug=device_slug, electrical=electrical, output_dir=output_dir
+    )
+
     return electrical
+
+
+def _write_parts_index(
+    *, device_slug: str, electrical: ElectricalGraph, output_dir: Path
+) -> None:
+    """Synthesize and persist memory/{slug}/parts_index.json.
+
+    Reads sibling classification artefacts; tolerates them being absent
+    (e.g. if their analyzer step failed earlier in this run).
+    """
+    passive_class = _safe_load_json(output_dir / "passive_classification_llm.json")
+    nets_class = _safe_load_json(output_dir / "nets_classified.json")
+    parts_index = build_parts_index(
+        slug=device_slug,
+        electrical_graph=electrical.model_dump(mode="json"),
+        passive_classification=passive_class,
+        nets_classified=nets_class,
+    )
+    (output_dir / "parts_index.json").write_text(
+        parts_index.model_dump_json(indent=2)
+    )
+    logger.info(
+        "[parts_index] wrote memory/%s/parts_index.json (%d entries)",
+        device_slug,
+        len(parts_index.entries),
+    )
+
+
+def _safe_load_json(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 def _upgrade_rails_from_classification(
