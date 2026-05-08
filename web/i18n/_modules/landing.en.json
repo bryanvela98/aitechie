@@ -62,5 +62,8 @@
   "suggest": {
     "aria": "Device suggestions",
     "draft": "draft"
+  },
+  "tools": {
+    "stock": "Stock"
   }
 }

@@ -20,6 +20,7 @@
     "pcb": "PCB",
     "schematic": "Schematic",
     "memory": "Mémoire",
+    "stock": "Stock",
     "profile": "Profil"
   },
   "metabar": {

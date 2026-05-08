@@ -59,6 +59,7 @@
 <link rel="stylesheet" href="styles/schematic.css?v=fitcenter">
 <link rel="stylesheet" href="/styles/profile.css" />
 <link rel="stylesheet" href="styles/protocol.css?v=edge29" />
+<link rel="stylesheet" href="styles/stock.css">
 <!-- Markdown rendering + sanitization for agent chat (MIT / Apache 2.0) -->
 <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
@@ -109,6 +110,17 @@
 <!-- Landing hero — visible only when body has class .show-landing -->
 <div id="landing-overlay" class="landing" hidden>
   <div class="landing-bg" aria-hidden="true"></div>
+  <nav class="landing-tools" aria-label="Tools">
+    <a href="#stock" id="landingStockLink" class="landing-tool-link">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+           stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="12" height="9" rx="1"/>
+        <path d="M2 7h12M5 4v3M11 4v3"/>
+      </svg>
+      <span data-i18n="landing.tools.stock">Stock</span>
+    </a>
+  </nav>
   <div class="landing-shell">
     <aside class="landing-sidebar" id="landingSidebar" hidden
            data-i18n-attr="aria-label:landing.sidebar.aria"
@@ -231,6 +243,14 @@
   <button class="rail-btn" data-section="pcb" data-i18n-attr="title:common.rail.pcb,aria-label:common.rail.pcb" title="PCB" aria-label="PCB"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg></button>
   <button class="rail-btn" data-section="schematic" data-i18n-attr="title:common.rail.schematic,aria-label:common.rail.schematic" title="Schematic" aria-label="Schematic"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg></button>
   <button class="rail-btn" data-section="graphe" data-i18n-attr="title:common.rail.memory,aria-label:common.rail.memory" title="Memory" aria-label="Memory"><svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8 7l8 0M7 8l4 7M17 9l-4 6"/></svg></button>
+  <button class="rail-btn" data-section="stock" data-i18n-attr="title:common.rail.stock,aria-label:common.rail.stock" title="Stock" aria-label="Stock">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+         stroke="currentColor" stroke-width="1.6"
+         stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="12" height="9" rx="1"/>
+      <path d="M2 7h12M5 4v3M11 4v3"/>
+    </svg>
+  </button>
   <div class="rail-sep"></div>
   <button class="rail-btn" data-section="profile" data-i18n-attr="title:common.rail.profile,aria-label:common.rail.profile" title="Profile" aria-label="Profile"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="10" cy="11" r="2.2"/><path d="M7 17c.5-1.5 1.8-2.5 3-2.5s2.5 1 3 2.5M15 9h3M15 13h3"/></svg></button>
 </div>
@@ -708,6 +728,70 @@
       <p data-i18n="memory_bank.empty.body_default">No knowledge pack is available. Run the pipeline to generate one.</p>
     </div>
   </div>
+</section>
+<section id="stock" class="hidden" data-section-stub="stock">
+  <div class="stock-back-row">
+    <a id="stockBackBtn" class="stock-back-link" href="/" data-i18n="stock.back_home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+           stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 12L6 8l4-4"/>
+      </svg>
+      <span>Back</span>
+    </a>
+  </div>
+  <header class="stock-metabar">
+    <div class="stock-counts">
+      <span class="chip mono"><span data-i18n="stock.donors">Donors</span>: <b id="stock-donors-count">0</b></span>
+      <span class="chip mono"><span data-i18n="stock.available">Available</span>: <b id="stock-available-count">0</b></span>
+      <span class="chip mono"><span data-i18n="stock.consumed">Consumed</span>: <b id="stock-consumed-count">0</b></span>
+    </div>
+    <button id="stock-add-donor-btn" class="btn-primary" data-i18n="stock.add_donor">+ Add donor</button>
+  </header>
+
+  <div class="stock-search-form">
+    <select id="stock-q-type">
+      <option value="">— Type —</option>
+      <option value="capacitor">Capacitor</option>
+      <option value="resistor">Resistor</option>
+      <option value="inductor">Inductor</option>
+      <option value="diode">Diode</option>
+      <option value="ic">IC</option>
+      <option value="transistor">Transistor</option>
+      <option value="ferrite">Ferrite bead</option>
+      <option value="connector">Connector</option>
+    </select>
+    <input id="stock-q-value" type="text" placeholder="Value (0.1uF, 10k, MPN…)">
+    <input id="stock-q-package" type="text" placeholder="Package (0402, QFN-24…)">
+    <input id="stock-q-voltage" type="number" placeholder="V min">
+    <select id="stock-q-role">
+      <option value="">— Target role —</option>
+      <option value="decoupling">decoupling</option>
+      <option value="bulk">bulk</option>
+      <option value="filter">filter</option>
+      <option value="bypass">bypass</option>
+      <option value="ac_coupling">ac_coupling</option>
+      <option value="tank">tank</option>
+      <option value="feedback">feedback</option>
+      <option value="pull_up">pull_up</option>
+      <option value="pull_down">pull_down</option>
+      <option value="current_sense">current_sense</option>
+      <option value="damping">damping</option>
+      <option value="series">series</option>
+      <option value="load_switch">load_switch</option>
+      <option value="level_shifter">level_shifter</option>
+      <option value="inrush_limiter">inrush_limiter</option>
+      <option value="flyback_switch">flyback_switch</option>
+      <option value="ic">ic</option>
+      <option value="connector">connector</option>
+    </select>
+    <button id="stock-search-btn" class="btn-primary" data-i18n="stock.search">Search</button>
+  </div>
+
+  <div id="stock-results" class="stock-results"></div>
+
+  <h2 class="stock-h2" data-i18n="stock.donors_title">Donors in stock</h2>
+  <div id="stock-donors-list" class="stock-donors-list"></div>
 </section>
 <section class="profile hidden" id="profileSection" data-partial="/profil.html"></section>
 

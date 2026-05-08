@@ -37,6 +37,7 @@ const MODULES = [
   'protocol',
   'router',
   'schematic',
+  'stock',
 ];
 
 const dicts = { en: {}, fr: {} };

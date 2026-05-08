@@ -4,6 +4,7 @@
     "pcb": "Boardview",
     "schematic": "Schematic",
     "graphe": "Memory",
+    "stock": "Stock & donors",
     "profile": "Profile"
   },
   "mode": {
@@ -13,6 +14,7 @@
     "tool_tag": "TOOL",
     "tool_boardview": "Boardview",
     "tool_schematic": "Electrical graph",
+    "tool_stock": "Stock & donors",
     "wait_tag": "WAITING",
     "wait_no_memory": "No memory loaded",
     "wait_no_repair": "No active repair",

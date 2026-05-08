@@ -2,7 +2,7 @@
 // Owns navigation between the 8 app sections and refreshes the chrome when
 // the active section or current device changes.
 
-export const SECTIONS = ["home", "pcb", "schematic", "graphe", "profile"];
+export const SECTIONS = ["home", "pcb", "schematic", "graphe", "stock", "profile"];
 
 // SECTION_META holds i18n keys instead of literal strings — resolved at
 // render time inside updateChrome(). On locale switch, refreshChrome() is
@@ -12,6 +12,7 @@ const SECTION_META = {
   pcb:           {crumbKey: "router.section.pcb",       mode: {tagKey: "router.mode.tool_tag",    subKey: "router.mode.tool_boardview",    color: "cyan"}},
   schematic:     {crumbKey: "router.section.schematic", mode: {tagKey: "router.mode.tool_tag",    subKey: "router.mode.tool_schematic",    color: "emerald"}},
   graphe:        {crumbKey: "router.section.graphe",    mode: {tagKey: "router.mode.wait_tag",    subKey: "router.mode.wait_no_memory",    color: "amber"}},
+  stock:         {crumbKey: "router.section.stock",     mode: {tagKey: "router.mode.tool_tag",    subKey: "router.mode.tool_stock",        color: "emerald"}},
   profile:       {crumbKey: "router.section.profile",   mode: {tagKey: "router.mode.profile_tag", subKey: "router.mode.profile_sub",       color: "cyan"}},
 };
 

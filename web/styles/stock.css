@@ -1,0 +1,304 @@
+/* Stock section styling — uses tokens from tokens.css.
+ * Layout matches the project shell convention: position fixed under the
+ * topbar (48px) + metabar (44px) = 92px top, leaving the rail (52px) on
+ * the left and the statusbar (28px) at the bottom. Mirrors .home / .canvas
+ * / .profile which all use the same fixed-frame pattern. */
+
+#stock {
+  position: fixed;
+  top: 92px;
+  left: 52px;
+  right: 0;
+  bottom: 28px;
+  z-index: 2;
+  padding: 16px 24px;
+  overflow-y: auto;
+  background: var(--bg);
+}
+#stock.hidden { display: none !important; }
+body.no-metabar #stock { top: 48px; }
+
+/* Standalone mode — accessed from the landing top-right "Stock" link.
+ * Hides every shell chrome element (topbar / rail / metabar / statusbar)
+ * so stock takes the full viewport like a dedicated tool page. The back
+ * link inside #stock returns the user to the landing. */
+body.standalone-tool .topbar,
+body.standalone-tool .metabar,
+body.standalone-tool .rail,
+body.standalone-tool .statusbar { display: none !important; }
+body.standalone-tool #stock {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 32px;
+}
+body.standalone-tool #stockBackBtn { display: inline-flex; }
+#stockBackBtn { display: none; }
+.stock-back-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stock-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-2);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.stock-back-link:hover {
+  color: var(--cyan);
+  border-color: var(--border-hover);
+}
+
+.stock-metabar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.stock-counts { display: flex; gap: 8px; }
+.stock-counts .chip {
+  background: var(--panel); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-2);
+}
+.stock-counts .chip b { color: var(--text); }
+
+.stock-search-form {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 80px 1.5fr auto;
+  gap: 8px; padding: 12px; background: var(--panel);
+  border: 1px solid var(--border); border-radius: 6px;
+  margin-bottom: 16px;
+}
+.stock-search-form select,
+.stock-search-form input {
+  background: var(--bg-2); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 8px; font-size: 13px;
+  border-radius: 4px; font-family: inherit;
+}
+.stock-search-form select:focus,
+.stock-search-form input:focus {
+  outline: none; border-color: var(--border-hover);
+}
+
+.stock-results { margin-bottom: 24px; }
+.stock-results .empty {
+  padding: 24px; text-align: center; color: var(--text-3);
+  background: var(--panel); border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+.result-group {
+  margin-bottom: 16px;
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.result-group h3 {
+  margin: 0; padding: 8px 12px; background: var(--panel-2);
+  font-size: 12px; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-2); font-family: 'JetBrains Mono', monospace;
+}
+.result-exact h3 { border-left: 3px solid var(--emerald); }
+.result-tolerant h3 { border-left: 3px solid var(--amber); }
+.result-list { list-style: none; padding: 0; margin: 0; }
+.result-list li {
+  display: grid;
+  grid-template-columns: 60px 1fr 1.5fr 60px auto;
+  gap: 12px; padding: 10px 12px;
+  border-top: 1px solid var(--border-soft);
+  align-items: center;
+}
+.result-list .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.result-list .dim { color: var(--text-2); }
+.result-list .donor { color: var(--cyan); font-size: 11px; }
+.result-list .crit { font-size: 10px; padding: 2px 6px; border-radius: 3px;
+                     font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+.crit-low { background: rgba(110, 200, 130, .2); color: var(--emerald); }
+.crit-medium { background: rgba(220, 180, 90, .2); color: var(--amber); }
+.crit-high { background: rgba(220, 90, 90, .2); color: #e08484; } /* single-use danger red, no token */
+.warnings { grid-column: 1 / -1; padding-top: 4px; font-size: 11px; color: var(--amber); }
+
+.stock-h2 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-2); margin: 16px 0 8px; font-weight: 600;
+}
+.stock-donors-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.donor-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px; transition: background .15s, border-color .15s;
+}
+.donor-card:hover { background: var(--panel-2); border-color: var(--border-hover); }
+.donor-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+.donor-id { color: var(--cyan); }
+.donor-condition { color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; }
+.donor-label { font-size: 13px; margin: 6px 0; color: var(--text); }
+.donor-stats {
+  font-size: 11px; color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.donor-stats .warn { color: var(--amber); }
+.donor-actions { display: flex; gap: 6px; margin-top: 10px; }
+.btn-sm {
+  padding: 4px 10px; font-size: 11px; background: var(--bg-2);
+  border: 1px solid var(--border); color: var(--text); border-radius: 4px;
+  cursor: pointer; transition: all .15s;
+}
+.btn-sm:hover { background: var(--panel-2); border-color: var(--border-hover); }
+.btn-danger:hover { color: #e08484; border-color: #e08484; } /* single-use danger red, no token */
+
+/* ----- Type chips, role chips, criticality dots (shared) -----
+ * Tight, mono, scanable at a glance. Used by both the harvest table and
+ * the search-result table. */
+
+.type-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: .4px;
+  border-radius: 3px; border: 1px solid;
+}
+.type-passive { color: var(--cyan); border-color: rgba(56, 189, 248, .35); background: rgba(56, 189, 248, .08); }
+.type-active  { color: var(--violet); border-color: rgba(167, 139, 250, .35); background: rgba(167, 139, 250, .08); }
+.type-mech    { color: var(--amber); border-color: rgba(245, 158, 11, .35); background: rgba(245, 158, 11, .08); }
+.type-other   { color: var(--text-3); border-color: var(--border); background: var(--panel); }
+
+.role-chip {
+  display: inline-block; padding: 1px 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  border-radius: 3px; border: 1px solid;
+  white-space: nowrap;
+}
+.role-chip.safety-tolerant_with_warning {
+  color: var(--emerald); border-color: rgba(52, 211, 153, .35); background: rgba(52, 211, 153, .08);
+}
+.role-chip.safety-exact_only {
+  color: var(--amber); border-color: rgba(245, 158, 11, .35); background: rgba(245, 158, 11, .08);
+}
+.role-chip.safety-blocked,
+.role-chip.role-unknown {
+  color: var(--text-3); border-color: var(--border-soft); background: var(--panel);
+}
+
+.crit-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  vertical-align: middle;
+}
+.crit-dot.crit-low    { background: var(--emerald); }
+.crit-dot.crit-medium { background: var(--amber); }
+.crit-dot.crit-high   { background: #e08484; } /* single-use danger red, no token */
+
+/* ----- Harvest overlay + table ----- */
+
+.harvest-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+}
+.harvest-panel.glass {
+  background: rgba(20, 20, 20, .94); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: 10px;
+  width: min(1100px, 92vw); max-height: 86vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.harvest-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+}
+.harvest-title { display: flex; align-items: baseline; gap: 12px; }
+.harvest-title h3 {
+  margin: 0; font-size: 13px; color: var(--text);
+  text-transform: uppercase; letter-spacing: .4px; font-weight: 600;
+}
+.harvest-title .mono.dim { font-size: 11px; color: var(--cyan); }
+
+.harvest-controls {
+  display: flex; gap: 8px; align-items: center;
+  padding: 10px 16px; border-bottom: 1px solid var(--border-soft);
+  background: var(--panel);
+}
+.harvest-controls input,
+.harvest-controls select {
+  background: var(--bg-2); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 8px; font-size: 12px;
+  border-radius: 4px; font-family: inherit;
+}
+.harvest-controls input:focus,
+.harvest-controls select:focus { outline: none; border-color: var(--border-hover); }
+.harvest-filter { flex: 1; min-width: 180px; }
+.harvest-type-filter, .harvest-sort { min-width: 140px; }
+#harvest-row-count { font-size: 10.5px; color: var(--text-3); }
+
+.harvest-table-wrap {
+  overflow-y: auto; flex: 1;
+}
+.harvest-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  font-size: 12px;
+}
+.harvest-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--panel-2); color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .4px;
+  font-weight: 600; text-align: left;
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+}
+.harvest-table tbody td {
+  padding: 6px 12px; border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+.harvest-table tbody tr:hover td { background: var(--panel); }
+.harvest-table .mono { font-family: 'JetBrains Mono', monospace; }
+.harvest-table .refdes { color: var(--cyan); font-weight: 600; }
+.harvest-table .value { color: var(--text); }
+.harvest-table .pkg { color: var(--text-2); }
+.harvest-table .dim { color: var(--text-3); }
+.harvest-table .pages { font-size: 11px; }
+.harvest-table .mpn { font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.harvest-table tr.consumed td { opacity: .45; }
+.harvest-table tr.consumed .refdes { text-decoration: line-through; }
+.harvest-empty { text-align: center; padding: 32px; color: var(--text-3); font-size: 12px; }
+
+/* ----- Search result tables (mirror harvest aesthetic) ----- */
+.result-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  font-size: 12px;
+}
+.result-table thead th {
+  background: var(--panel-2); color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .4px;
+  font-weight: 600; text-align: left;
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+}
+.result-table tbody td {
+  padding: 6px 12px; border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+.result-table tbody tr:hover td { background: var(--panel); }
+.result-table .mono { font-family: 'JetBrains Mono', monospace; }
+.result-table .refdes { color: var(--cyan); font-weight: 600; }
+.result-table .value { color: var(--text); }
+.result-table .pkg { color: var(--text-2); }
+.result-table .donor { color: var(--text-2); font-size: 11px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-table .pages { font-size: 11px; }
+.result-table tr.warnings-row td {
+  font-size: 11px; color: var(--amber); padding-top: 0;
+  border-bottom: 1px solid var(--border-soft); background: rgba(245, 158, 11, .04);
+}

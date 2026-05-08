@@ -8,12 +8,13 @@ import { loadTaxonomy, loadRepairs, renderHome, initNewRepairModal, renderRepair
 import { loadGraphFromBackend, setEmptyState, initGraphWithData } from './graph.js';
 import { initMemoryBank, loadMemoryBank } from './memory_bank.js';
 import { initProfileSection } from './profile.js';
+import { initStockSection } from './stock.js';
 import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
 import { initCameraPicker } from './camera.js';
 import { updatePreviewDevice } from './camera_preview.js';
 import { loadSchematic, closeSchematicInspector } from './schematic.js?v=fitzoom';
-import { initLanding, showLanding } from './landing.js';
+import { initLanding, showLanding, hideLanding } from './landing.js';
 import { mountMascot } from './mascot.js';
 import * as Protocol from './protocol.js?v=quest4';
 
@@ -91,11 +92,29 @@ if (!window.Boardview) {
   });
   window.Protocol = Protocol;
 
-  // Landing hero — initialise listeners; show only if no repair param.
+  // Landing hero — initialise listeners; show only if no repair param AND
+  // not requesting a standalone tool. Stock has two access modes:
+  //   1. ?tool=stock   → full-viewport standalone (chrome hidden, exit
+  //                      button takes user back to landing).
+  //   2. #stock inside a repair → embedded section in the rail.
   initLanding();
   const __landingParams = new URLSearchParams(window.location.search);
-  if (!__landingParams.get("repair") && !__landingParams.get("device")) {
+  const __wantsStandaloneTool = __landingParams.get("tool") === "stock";
+  if (__wantsStandaloneTool) {
+    document.body.classList.add("standalone-tool", "tool-stock");
+    if (!window.location.hash) window.location.hash = "#stock";
+  }
+  if (!__landingParams.get("repair") && !__landingParams.get("device") && !__wantsStandaloneTool) {
     showLanding();
+  }
+  // Wire the landing top-right "Stock" link: jump to standalone-tool mode
+  // (hard nav so the body-class branch above runs cleanly).
+  const __stockLink = document.getElementById("landingStockLink");
+  if (__stockLink) {
+    __stockLink.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      window.location = "?tool=stock#stock";
+    });
   }
 
   // Legacy redirect: #memory-bank is merged into #graphe with view=md.
@@ -135,6 +154,8 @@ if (!window.Boardview) {
     }
   } else if (initial === "schematic") {
     loadSchematic();
+  } else if (initial === "stock") {
+    initStockSection();
   } else if (initial === "profile") {
     initProfileSection();
   }
@@ -147,6 +168,7 @@ if (!window.Boardview) {
   window.addEventListener("hashchange", async () => {
     const sec = currentSection();
     if (sec === "schematic") loadSchematic();
+    else if (sec === "stock") initStockSection();
     else if (sec === "profile") initProfileSection();
     else if (sec === "graphe") {
       const mode = currentViewMode();

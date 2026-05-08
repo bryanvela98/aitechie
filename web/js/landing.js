@@ -169,7 +169,7 @@ export function showLanding() {
   setTimeout(() => document.getElementById("landingDevice")?.focus(), 50);
 }
 
-function hideLanding() {
+export function hideLanding() {
   document.body.classList.remove("show-landing");
   const ov = document.getElementById("landing-overlay");
   if (ov) ov.hidden = true;

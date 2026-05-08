@@ -4,6 +4,39 @@
 
 .landing[hidden] { display: none !important; }
 
+/* Top-right tools nav — stock & other repair-independent utilities.
+ * Sits above the hero grid so it doesn't shift the centered content. */
+.landing-tools {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 1001;
+  display: flex;
+  gap: 8px;
+}
+.landing-tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-2);
+  background: rgba(15, 26, 46, 0.55);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.landing-tool-link:hover {
+  color: var(--cyan);
+  border-color: rgba(56, 189, 248, .35);
+  background: rgba(56, 189, 248, .08);
+}
+
 .landing {
   position: fixed;
   inset: 0;
