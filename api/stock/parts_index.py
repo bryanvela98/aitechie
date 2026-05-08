@@ -21,6 +21,25 @@ from api.stock.schemas import PartsIndex, PartsIndexEntry
 logger = logging.getLogger(__name__)
 
 
+def _coerce_voltage_rating(raw) -> float | None:
+    """Source ComponentValue.voltage_rating is `str | None` ("6.3V", "16V").
+
+    Strip a trailing V/v and parse the leading number. Returns None on any
+    failure (including multi-rating strings like "6.3V/35V" — too lossy to
+    pick one safely). Numeric inputs pass through.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip().rstrip("Vv").strip()
+    try:
+        return float(s)
+    except ValueError:
+        logger.debug("parts_index: could not parse voltage_rating %r", raw)
+        return None
+
+
 def _canonicalize_value(value: dict | None) -> str | None:
     """Normalize the raw value string to a canonical form.
 
@@ -149,7 +168,7 @@ def build_parts_index(
             value_raw=(value.get("raw") if value else None),
             package=(value.get("package") if value else None),
             mpn=(value.get("mpn") if value else None),
-            voltage_rating=(value.get("voltage_rating") if value else None),
+            voltage_rating=_coerce_voltage_rating(value.get("voltage_rating") if value else None),
             tolerance=(value.get("tolerance") if value else None),
             role_in_design=role,
             safety_class=safety,
