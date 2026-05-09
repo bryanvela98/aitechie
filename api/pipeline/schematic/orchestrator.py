@@ -47,7 +47,11 @@ from api.pipeline.schematic.schemas import (
     NetClassification,
     SchematicPageGraph,
 )
-from api.stock.parts_index import build_parts_index
+
+# api.stock.parts_index is imported lazily inside _write_parts_index — a
+# top-level import here triggers a circular load via api.pipeline.__init__
+# (which re-exports ingest_schematic) → api.stock.__init__ → router →
+# schemas → api.pipeline.schematic.schemas → us. Keep the import local.
 
 logger = logging.getLogger("wrench_board.pipeline.schematic.orchestrator")
 
@@ -252,6 +256,9 @@ def _write_parts_index(
     Reads sibling classification artefacts; tolerates them being absent
     (e.g. if their analyzer step failed earlier in this run).
     """
+    # Local import — see top-of-file note on the circular dep.
+    from api.stock.parts_index import build_parts_index
+
     passive_class = _safe_load_json(output_dir / "passive_classification_llm.json")
     nets_class = _safe_load_json(output_dir / "nets_classified.json")
     parts_index = build_parts_index(
