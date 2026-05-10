@@ -789,12 +789,11 @@ STOCK_TOOLS: list[dict] = [
         "name": "stock_search",
         "description": (
             "Search the technician's donor stock for a part matching the given "
-            "electrical signature. Returns exact_matches (safe to use), "
-            "tolerant_matches (acceptable substitutions with explicit warnings), "
-            "and blocked_substitutes (refused for safety — do not mention these to "
-            "the user). Call this proactively after confirming a cause that "
-            "requires component replacement, BEFORE recommending where to source "
-            "the part."
+            "electrical signature. Returns exact_matches (drop-in compatible: "
+            "same type, package, value, MPN, with voltage_rating ≥ requested) "
+            "or empty_reason when nothing matches. Call this proactively after "
+            "confirming a cause that requires component replacement, BEFORE "
+            "recommending where to source the part."
         ),
         "input_schema": {
             "type": "object",
@@ -810,17 +809,6 @@ STOCK_TOOLS: list[dict] = [
                 "mpn": {"type": "string", "description": "exact MPN (required for ICs)"},
                 "voltage_min": {"type": "number",
                                 "description": "minimum voltage_rating (caps only)"},
-                "requested_role": {
-                    "type": "string",
-                    "description": (
-                        "Functional role of the part in the *target* repair (board being fixed). "
-                        "Use the canonical role taxonomy: decoupling, bulk, filter, "
-                        "ac_coupling, tank, bypass, feedback, pull_up, pull_down, "
-                        "current_sense, damping, series, load_switch, level_shifter, "
-                        "inrush_limiter, flyback_switch, ic, connector. If unsure, "
-                        "omit — a missing role disables tolerant substitution (fail-safe)."
-                    ),
-                },
                 "exclude_donors": {"type": "array", "items": {"type": "string"}},
             },
             "required": ["type"],
@@ -1347,19 +1335,14 @@ similar, do not emit. Stay in free chat mode as before.
 STOCK AWARENESS — always check local stock before external sourcing.
 When you confirm a root cause that requires replacing a specific component
 (refdes + value), ALWAYS call `stock_search` before recommending where the
-technician should source the part. Pass the part's functional role
-(`requested_role`) so the safety filter knows whether tolerant substitutions
-are acceptable.
+technician should source the part.
 
-If exact matches exist in stock, surface them first with the donor label,
-refdes, and schematic page. If only tolerant matches exist, surface them
-with the warnings provided by the tool. If `blocked_substitutes` are
-returned, do NOT mention them to the user — they are unsafe substitutions
-filtered out for their protection. If no matches exist, recommend external
-sourcing as fallback.
+If exact_matches are returned, surface them with the donor label, refdes,
+and schematic page so the technician can harvest from their own stock.
+If empty_reason is returned, recommend external sourcing as fallback.
 
-Never invent stock entries. Never recommend a substitution outside what
-`stock_search` returns.
+Never invent stock entries. The tool returns only drop-in compatible parts
+— never recommend a substitution outside what `stock_search` returns.
 
 TIER. When you are running on tier=fast (Haiku), you are
 under-sized for complex diagnostics (long tail, dense schematic).

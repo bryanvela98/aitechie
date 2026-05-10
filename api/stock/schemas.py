@@ -94,14 +94,10 @@ class StockSearchMatch(BaseModel):
     voltage_rating: float | None
     pages: list[int] = Field(default_factory=list)
     criticality_in_donor: Literal["low", "medium", "high"]
-    match_kind: Literal["exact", "tolerant"]
-    substitution_warnings: list[str] = Field(default_factory=list)
 
 
 class StockSearchResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     exact_matches: list[StockSearchMatch] = Field(default_factory=list)
-    tolerant_matches: list[StockSearchMatch] = Field(default_factory=list)
-    blocked_substitutes: list[dict] = Field(default_factory=list)
     empty_reason: str | None = None

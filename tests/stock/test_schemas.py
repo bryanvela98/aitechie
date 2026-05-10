@@ -123,8 +123,6 @@ def test_stock_search_query_minimal():
 def test_stock_search_result_empty():
     res = StockSearchResult(
         exact_matches=[],
-        tolerant_matches=[],
-        blocked_substitutes=[],
         empty_reason="no donors in stock",
     )
     assert res.empty_reason == "no donors in stock"

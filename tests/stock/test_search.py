@@ -91,23 +91,21 @@ def test_no_donors_returns_empty_reason(tmp_path, monkeypatch):
 def test_exact_match_decoupling(two_donors):
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.1uF", package="0402",
-        voltage_min=25.0, requested_role="decoupling",
+        voltage_min=25.0,
     ))
-    # All 4 caps match strictly: C1 (x, 25V), C2 (x, 50V), C3 (x, 25V — exact_only
-    # role on donor but exact value match wins per spec §6), C10 (13, 25V).
+    # All 4 caps match strictly: C1 (x, 25V), C2 (x, 50V), C3 (x, 25V — donor's
+    # safety_class=exact_only does not block when the value matches exactly),
+    # C10 (13, 25V).
     refdes_set = {m.refdes for m in res.exact_matches}
     assert refdes_set == {"C1", "C2", "C3", "C10"}
-    assert all(m.match_kind == "exact" for m in res.exact_matches)
 
 
-def test_filter_cap_blocked(two_donors):
+def test_exact_match_ignores_donor_safety_class(two_donors):
+    # C3 is exact_only on the donor side. A strict match by value is still a
+    # drop-in replacement, so it must surface in exact_matches.
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.1uF", package="0402",
-        requested_role="decoupling",
     ))
-    # C3 is exact_only (safety_class) — when requested_role is decoupling
-    # (tolerant), but the donor entry's safety is exact_only AND the values
-    # match exactly, it should still appear in exact_matches (exact wins).
     assert any(m.refdes == "C3" for m in res.exact_matches)
 
 
@@ -116,7 +114,6 @@ def test_consumed_excluded(two_donors):
     consume_part(donor_id="iphone-x-donor-2026-001", refdes="C1")
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.1uF", package="0402",
-        requested_role="decoupling",
     ))
     refdes_donor_pairs = {(m.donor_id, m.refdes) for m in res.exact_matches}
     assert ("iphone-x-donor-2026-001", "C1") not in refdes_donor_pairs
@@ -126,7 +123,6 @@ def test_consumed_excluded(two_donors):
 def test_exclude_donor_param(two_donors):
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.1uF", package="0402",
-        requested_role="decoupling",
         exclude_donors=["iphone-x-donor-2026-001"],
     ))
     donor_ids = {m.donor_id for m in res.exact_matches}
@@ -135,7 +131,7 @@ def test_exclude_donor_param(two_donors):
 
 def test_ic_strict_match_by_mpn(two_donors):
     res = stock_search(StockSearchQuery(
-        type="ic", mpn="MAX77818EWY", package="QFN-56", requested_role="ic",
+        type="ic", mpn="MAX77818EWY", package="QFN-56",
     ))
     assert len(res.exact_matches) == 1
     assert res.exact_matches[0].refdes == "U7"
@@ -143,34 +139,19 @@ def test_ic_strict_match_by_mpn(two_donors):
 
 def test_ic_wrong_mpn_no_match(two_donors):
     res = stock_search(StockSearchQuery(
-        type="ic", mpn="DIFFERENT_MPN", package="QFN-56", requested_role="ic",
+        type="ic", mpn="DIFFERENT_MPN", package="QFN-56",
     ))
     assert res.exact_matches == []
-    assert res.tolerant_matches == []
     assert res.empty_reason == "no matching parts available"
 
 
-def test_critical_requested_role_blocks_tolerant(two_donors):
-    # Tech is replacing a feedback resistor (critical). Tolerant must be
-    # blocked even though donor's role is tolerant-OK.
+def test_value_mismatch_returns_empty(two_donors):
+    # value_canonical must match strictly — no tolerant lane in v1.
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.22uF", package="0402",
-        requested_role="feedback",
     ))
-    # No exact (value mismatch) and no tolerant (role critical) → empty
     assert res.exact_matches == []
-    assert res.tolerant_matches == []
-
-
-def test_tolerant_value_mismatch_does_not_pass(two_donors):
-    # Spec §6.2: value_canonical must match even in tolerant mode
-    res = stock_search(StockSearchQuery(
-        type="capacitor", value_canonical="0.22uF", package="0402",
-        requested_role="decoupling",
-    ))
-    # No 0.22uF in stock — neither exact nor tolerant
-    assert res.exact_matches == []
-    assert res.tolerant_matches == []
+    assert res.empty_reason == "no matching parts available"
 
 
 def test_donor_without_parts_index_silently_skipped(two_donors, tmp_path):
@@ -182,7 +163,6 @@ def test_donor_without_parts_index_silently_skipped(two_donors, tmp_path):
     # Search should not raise
     res = stock_search(StockSearchQuery(
         type="capacitor", value_canonical="0.1uF", package="0402",
-        requested_role="decoupling",
     ))
     # Same 3 matches as before (the new donor is silently skipped)
     assert len(res.exact_matches) >= 3
