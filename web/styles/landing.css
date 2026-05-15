@@ -256,6 +256,11 @@ body.pending-landing .statusbar { display: none !important; }
   flex: 0 0 auto;
 }
 
+/* Landing CTA uses --cyan (component) instead of --violet (action) to match
+ * the brand-mark accent on the hero — the landing page is the only place
+ * where the brand chrome and the primary button share the visual frame.
+ * This is the only --cyan-as-CTA in the app; every other action button in
+ * the workspace stays on --violet. */
 .landing-submit {
   background: var(--cyan);
   color: var(--bg-deep);

@@ -152,7 +152,11 @@ def sanitize_agent_text(text: str, board: Board | None) -> tuple[str, list[str]]
 # tool outputs leaked into prose. See spec §9 last paragraph.
 # --------------------------------------------------------------------------- #
 
-_DONOR_ID_RE = re.compile(r"\b[a-z][a-z0-9-]*-donor-\d{4}-\d{3}\b")
+# Allow digit-first slugs (e.g. "13-pro-donor-2026-001"). Device slugs are
+# not constrained to letter-first names — `13-pro` is a legitimate slug —
+# so the prefix character class must accept digits too, otherwise digit-
+# leading donor ids escape the anti-hallucination guard.
+_DONOR_ID_RE = re.compile(r"\b[a-z0-9][a-z0-9-]*-donor-\d{4}-\d{3}\b")
 
 
 def _validate_donor_ids(text: str) -> str:

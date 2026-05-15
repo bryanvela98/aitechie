@@ -162,7 +162,7 @@ def main() -> None:
                 f"error: {path} does not exist — run the full pipeline first.",
                 file=sys.stderr,
             )
-            return 1
+            sys.exit(1)
         graph = ElectricalGraph.model_validate_json(path.read_text())
         assignments = classify_passives_heuristic(graph)
         enriched = dict(graph.components)
@@ -183,7 +183,7 @@ def main() -> None:
             f"re-classified {len(assignments)} passives in {path} "
             f"({touched} updated, {len(assignments) - touched} unchanged)"
         )
-        return 0
+        sys.exit(0)
 
     # Handle --build-parts-index mode (early return)
     if args.build_parts_index:
@@ -193,14 +193,14 @@ def main() -> None:
         memory_dir = Path(settings.memory_root) / slug
         if not memory_dir.exists():
             print(f"error: memory/{slug}/ does not exist", file=sys.stderr)
-            return 1
+            sys.exit(1)
         eg_path = memory_dir / "electrical_graph.json"
         if not eg_path.exists():
             print(
                 f"error: {eg_path} does not exist — run full ingestion first",
                 file=sys.stderr,
             )
-            return 1
+            sys.exit(1)
 
         eg = json.loads(eg_path.read_text(encoding="utf-8"))
         pc_path = memory_dir / "passive_classification_llm.json"
@@ -215,7 +215,7 @@ def main() -> None:
         out = memory_dir / "parts_index.json"
         out.write_text(idx.model_dump_json(indent=2), encoding="utf-8")
         print(f"wrote {out} ({len(idx.entries)} entries)")
-        return 0
+        sys.exit(0)
 
     # Normal vision mode (requires pdf and page args)
     if args.pdf is None or args.page is None:

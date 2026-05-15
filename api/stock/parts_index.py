@@ -24,15 +24,31 @@ logger = logging.getLogger(__name__)
 def _coerce_voltage_rating(raw) -> float | None:
     """Source ComponentValue.voltage_rating is `str | None` ("6.3V", "16V").
 
-    Strip a trailing V/v and parse the leading number. Returns None on any
-    failure (including multi-rating strings like "6.3V/35V" — too lossy to
-    pick one safely). Numeric inputs pass through.
+    Strip a trailing V/v and parse the leading number. Numeric inputs pass
+    through. For multi-rating strings like "6.3V/35V" or "6.3V,35V", take
+    the MIN value (most conservative for the safety filter — a 6.3V cap
+    must not surface as a substitute for a 25V slot).
+    Returns None when nothing parseable remains.
     """
     if raw is None:
         return None
     if isinstance(raw, (int, float)):
         return float(raw)
-    s = str(raw).strip().rstrip("Vv").strip()
+    s = str(raw).strip()
+    if "/" in s or "," in s:
+        parts = re.split(r"[/,]", s)
+        vals: list[float] = []
+        for p in parts:
+            stripped = p.strip().rstrip("Vv").strip()
+            try:
+                vals.append(float(stripped))
+            except ValueError:
+                continue
+        if vals:
+            return min(vals)
+        logger.debug("parts_index: could not parse multi voltage_rating %r", raw)
+        return None
+    s = s.rstrip("Vv").strip()
     try:
         return float(s)
     except ValueError:

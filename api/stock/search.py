@@ -55,6 +55,10 @@ def _is_strict_match(entry: PartsIndexEntry, q: StockSearchQuery) -> bool:
 
 
 def _rank_key(match: StockSearchMatch) -> tuple:
+    # Surface the LEAST-critical-on-donor parts first: harvesting a low-
+    # criticality cap from a donor preserves more of the donor's residual
+    # value than yanking a primary-rail PMIC. Higher criticality sinks
+    # toward the bottom of the result list.
     crit_order = {"low": 0, "medium": 1, "high": 2}
     return (crit_order.get(match.criticality_in_donor, 9),)
 

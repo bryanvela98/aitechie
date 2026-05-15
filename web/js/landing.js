@@ -12,6 +12,7 @@
 
 import { mountMascot, setMascotState } from './mascot.js';
 import { prettifySlug } from './router.js';
+import i18n from './i18n.js';
 
 const STATUS_NEUTRAL = "";
 const STATUS_LOADING = "loading";
@@ -29,9 +30,17 @@ function setLandingMascot(state) {
   setMascotState(_landingMascot, state);
 }
 
-const _landingDateFmt = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-});
+// Date formatter follows the active i18n locale (driven by profile.reply_language
+// since commit 548ed20 dropped the topbar switch). Re-derived lazily so we
+// pick up locale changes mid-session without a page reload.
+function _landingDateFmt() {
+  const locale = (i18n && i18n.locale) || 'en';
+  // Map our short locale codes to BCP-47 region tags Intl expects.
+  const bcp47 = locale === 'fr' ? 'fr-FR' : 'en-US';
+  return new Intl.DateTimeFormat(bcp47, {
+    day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+  });
+}
 
 async function loadAndRenderSidebar() {
   const sidebar = document.getElementById("landingSidebar");
@@ -84,7 +93,7 @@ async function loadAndRenderSidebar() {
     const meta = document.createElement("span");
     meta.className = "landing-sidebar-meta";
     const dateStr = r.created_at
-      ? _landingDateFmt.format(new Date(r.created_at)).replace(/,\s*/g, " ")
+      ? _landingDateFmt().format(new Date(r.created_at)).replace(/,\s*/g, " ")
       : "";
     const ridShort = (r.repair_id || "").slice(0, 8);
     meta.textContent = dateStr ? `${dateStr} · ${ridShort}` : ridShort;

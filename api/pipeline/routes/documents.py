@@ -387,10 +387,9 @@ def _apply_schematic_pin(
         sources.restore_from_cache(pack_dir, pdf_hash)
         return "cached", None, None
 
-    # Cache miss — install the new PDF in place, drop stale derived files
-    # (so detect helpers report has_electrical_graph=False during build),
-    # then kick off the vision pipeline as a background task.
-    shutil.copyfile(target, pack_dir / "schematic.pdf")
+    # Cache miss — drop stale derived files first (so detect helpers report
+    # has_electrical_graph=False during build), then install the new PDF
+    # in place and kick off the vision pipeline as a background task.
     sources.clear_in_place_schematic(pack_dir)
     shutil.copyfile(target, pack_dir / "schematic.pdf")
     asyncio.create_task(

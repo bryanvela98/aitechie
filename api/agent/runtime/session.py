@@ -334,7 +334,6 @@ async def run_diagnostic_session_managed(
             conv_id=resolved_conv_id,
             tier=tier,
         )
-    session = None
     # Classify the session-start path into one of five disjoint modes
     # (see api/agent/session_start_mode.py for the full table). The mode
     # drives the WS event contract — `context_lost` vs `session_resumed`

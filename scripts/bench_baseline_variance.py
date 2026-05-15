@@ -41,7 +41,9 @@ async def main() -> None:
     target = next(p for p in pages if p.page_number == args.page)
     log.info("rendered page %d at %s", args.page, target.png_path)
 
-    api_key = os.environ["ANTHROPIC_API_KEY"]
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise SystemExit("ANTHROPIC_API_KEY missing — set it in .env and retry")
     client = AsyncAnthropic(api_key=api_key)
 
     log.info("running single-shot baseline on page %d (this is run B1)...", args.page)

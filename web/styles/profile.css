@@ -462,6 +462,13 @@ body.llm-open .profile-skills { grid-template-columns: 1fr; }
   width: 2px;
   background: var(--border-soft);
 }
+/* Skill mastery progression palette — intentional reuse of the four semantic
+ * tokens as a 4-step ladder: violet (action/done) → emerald (active/practiced)
+ * → cyan (in-progress/learning) → neutral text-3 (untouched). Documented
+ * exception to the "never repurpose semantic colors" rule because the
+ * progression carries meaning the technician reads at a glance, and the
+ * colors only ever appear inside .profile-skill-col scope (no risk of
+ * collision with their canonical meanings elsewhere in the UI). */
 .profile-skill-col[data-status="mastered"]::before  { background: var(--violet);  }
 .profile-skill-col[data-status="practiced"]::before { background: var(--emerald); }
 .profile-skill-col[data-status="learning"]::before  { background: var(--cyan);    }

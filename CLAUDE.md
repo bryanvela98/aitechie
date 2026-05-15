@@ -47,8 +47,11 @@ and a stateful **diagnostic conversation** runs the live repair session.
   (`d3js.org`), Three.js r128 (`cdnjs.cloudflare.com`, MIT) for the WebGL
   boardview, Tailwind CDN (`cdn.tailwindcss.com`, MIT) for utility classes
   in the PCB section, marked and DOMPurify (`cdn.jsdelivr.net`, both MIT)
-  for safe Markdown rendering in the chat panel, and Inter + JetBrains
-  Mono fonts (`fonts.googleapis.com`). Any new CDN dependency must be
+  for safe Markdown rendering in the chat panel, Pickr 1.9.1
+  (`cdn.jsdelivr.net`, MIT) for the Tweaks panel pin-color pickers (its
+  popover auto-flips on viewport edges where native `<input type="color">`
+  clips off a fixed-position panel), and Inter + JetBrains Mono fonts
+  (`fonts.googleapis.com`). Any new CDN dependency must be
   permissively licensed and land in `web/index.html` with no transitive
   package-manager step.
 
